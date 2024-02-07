@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 
 void main() {
   runApp(const MyApp());
 }
+
+final ThemeData defaultThemeOfWebApp = ThemeData(
+  colorScheme: ColorScheme.fromSeed(seedColor: DefaultColors.primaryColor),
+);
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -11,10 +16,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: defaultThemeOfWebApp,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }

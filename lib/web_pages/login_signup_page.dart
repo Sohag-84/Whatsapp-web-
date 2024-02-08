@@ -25,6 +25,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
 
   bool loadingOn = false;
 
+  ///for pick image
   chooseImage() async {
     FilePickerResult? chooseImageFile =
         await FilePicker.platform.pickFiles(type: FileType.image);
@@ -32,6 +33,43 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     setState(() {
       selectedImage = chooseImageFile!.files.single.bytes;
     });
+  }
+
+  ///for login & registration
+  signupOrLogin() async {
+    setState(() {
+      loadingOn = true;
+      errorInPicture = false;
+      errorInEmail = false;
+      errorInName = false;
+      errorInPassword = false;
+    });
+
+    String nameInput = nameController.text.trim();
+    String emailInput = emailController.text.trim();
+    String passwordInput = passwordController.text.trim();
+
+    if (emailInput.isNotEmpty && emailInput.contains("@")) {
+      if (passwordInput.isNotEmpty && passwordInput.length < 7) {
+        ///signup form
+        if (doesUserWantoSignup == true) {
+        } else {
+          ///login form
+        }
+      } else {
+        var snackBar = const SnackBar(content: Text("Password is not valid"));
+        ScaffoldMessenger.of(context).showSnackBar(snackBar);
+        setState(() {
+          loadingOn = false;
+        });
+      }
+    } else {
+      var snackBar = const SnackBar(content: Text("Email is not valid"));
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      setState(() {
+        loadingOn = false;
+      });
+    }
   }
 
   @override
@@ -169,11 +207,11 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
                           ),
                           const SizedBox(height: 20),
 
-                          ///login regester button
+                          ///login register button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {},
+                              onPressed: signupOrLogin,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: DefaultColors.primaryColor,
                               ),

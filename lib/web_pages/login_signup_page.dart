@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 
@@ -23,6 +24,15 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
   final passwordController = TextEditingController();
 
   bool loadingOn = false;
+
+  chooseImage() async {
+    FilePickerResult? chooseImageFile =
+        await FilePicker.platform.pickFiles(type: FileType.image);
+
+    setState(() {
+      selectedImage = chooseImageFile!.files.single.bytes;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,7 +89,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
                           Visibility(
                             visible: doesUserWantoSignup,
                             child: OutlinedButton(
-                              onPressed: () {},
+                              onPressed: chooseImage,
                               style: errorInPicture
                                   ? OutlinedButton.styleFrom(
                                       side: const BorderSide(

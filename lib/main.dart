@@ -18,7 +18,8 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Whatsapp web clone',
+      debugShowCheckedModeBanner: false,
       theme: defaultThemeOfWebApp,
       initialRoute: firstRoute,
       onGenerateRoute: RoutesForWebPages.createRoutes,

@@ -1,8 +1,12 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
+import 'package:whatsapp_web_clone/models/user_model.dart';
 
 class LoginSignupPage extends StatefulWidget {
   const LoginSignupPage({super.key});
@@ -35,8 +39,60 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     });
   }
 
-  ///for login & registration
-  signupOrLogin() async {
+  ///upload image in the database
+  uploadImageToStorage({required UserModel userData}) {
+    if (selectedImage != null) {
+      Reference imageRef =
+          FirebaseStorage.instance.ref("Profileimages${userData.uid}.jpg");
+      UploadTask uploadTask = imageRef.putData(selectedImage!);
+      uploadTask.whenComplete(() async {
+        String urlImage = await uploadTask.snapshot.ref.getDownloadURL();
+        userData.image = urlImage;
+
+        ///3.-->save user data to firebase database
+        await FirebaseAuth.instance.currentUser!
+            .updateDisplayName(userData.name);
+        await FirebaseAuth.instance.currentUser!.updatePhotoURL(urlImage);
+
+        final userReference = FirebaseFirestore.instance.collection("users");
+        userReference.doc(userData.uid).set(userData.toMap()).then((value) {
+          setState(() {
+            loadingOn = false;
+            Navigator.pushReplacementNamed(context, "/home");
+          });
+        });
+      });
+    } else {
+      var snackBar = const SnackBar(
+        content: Center(child: Text("Please select image first!")),
+        backgroundColor: DefaultColors.primaryColor,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    }
+  }
+
+  ///for user signup
+  signupUser({
+    required String name,
+    required String email,
+    required String password,
+  }) async {
+    ///1.--> create new user in firebase authentication
+    final userCreated =
+        await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email,
+      password: password,
+    );
+
+    ///2.--> upload profile image to storage
+    String? uid = userCreated.user!.uid;
+    final userData =
+        UserModel(uid: uid, name: name, email: email, password: password);
+    uploadImageToStorage(userData: userData);
+  }
+
+  ///for form validation || login & registration
+  formValidation() async {
     setState(() {
       loadingOn = true;
       errorInPicture = false;
@@ -50,21 +106,42 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     String passwordInput = passwordController.text.trim();
 
     if (emailInput.isNotEmpty && emailInput.contains("@")) {
-      if (passwordInput.isNotEmpty && passwordInput.length < 7) {
+      if (passwordInput.isNotEmpty && passwordInput.length > 7) {
         ///signup form
         if (doesUserWantoSignup == true) {
+          if (nameInput.isNotEmpty && nameInput.length >= 3) {
+            signupUser(
+              name: nameInput,
+              email: emailInput,
+              password: passwordInput,
+            );
+          } else {
+            var snackBar = const SnackBar(
+              content: Center(
+                child: Text("Username must be at least 3 characters"),
+              ),
+              backgroundColor: DefaultColors.primaryColor,
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
         } else {
           ///login form
         }
       } else {
-        var snackBar = const SnackBar(content: Text("Password is not valid"));
+        var snackBar = const SnackBar(
+          content: Center(child: Text("Password is not valid")),
+          backgroundColor: DefaultColors.primaryColor,
+        );
         ScaffoldMessenger.of(context).showSnackBar(snackBar);
         setState(() {
           loadingOn = false;
         });
       }
     } else {
-      var snackBar = const SnackBar(content: Text("Email is not valid"));
+      var snackBar = const SnackBar(
+        content: Center(child: Text("Email is not valid")),
+        backgroundColor: DefaultColors.primaryColor,
+      );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       setState(() {
         loadingOn = false;
@@ -211,7 +288,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: signupOrLogin,
+                              onPressed: formValidation,
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: DefaultColors.primaryColor,
                               ),
@@ -219,8 +296,8 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
                                 padding: const EdgeInsets.all(8.0),
                                 child: loadingOn
                                     ? const SizedBox(
-                                        height: 19,
-                                        width: 19,
+                                        height: 25,
+                                        width: 25,
                                         child: CircularProgressIndicator(
                                           color: Colors.white,
                                         ),

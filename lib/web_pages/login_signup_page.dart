@@ -91,6 +91,21 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
     uploadImageToStorage(userData: userData);
   }
 
+  ///for user login
+  loginUser({required String email, required String password}) {
+    FirebaseAuth.instance
+        .signInWithEmailAndPassword(
+      email: email,
+      password: password,
+    )
+        .then((value) {
+      setState(() {
+        loadingOn = false;
+      });
+      Navigator.pushReplacementNamed(context, "/home");
+    });
+  }
+
   ///for form validation || login & registration
   formValidation() async {
     setState(() {
@@ -126,6 +141,7 @@ class _LoginSignupPageState extends State<LoginSignupPage> {
           }
         } else {
           ///login form
+          loginUser(email: emailInput, password: passwordInput);
         }
       } else {
         var snackBar = const SnackBar(

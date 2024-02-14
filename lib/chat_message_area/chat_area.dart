@@ -28,6 +28,7 @@ class _ChatAreaState extends State<ChatArea> {
         ),
         child: Column(
           children: [
+            ///header
             Container(
               padding: const EdgeInsets.all(8),
               color: DefaultColors.backgroundColor,
@@ -59,7 +60,32 @@ class _ChatAreaState extends State<ChatArea> {
                   ),
                 ],
               ),
-            )
+            ),
+            const SizedBox(height: 5),
+
+            ///tabs button
+            const TabBar(
+              unselectedLabelColor: Colors.grey,
+              labelColor: Colors.black,
+              indicatorColor: DefaultColors.primaryColor,
+              indicatorWeight: 2,
+              labelStyle: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              tabs: [
+                Text("Recent Chats"),
+                Text("Contacts"),
+              ],
+            ),
+            // Expanded(
+            //   child: Container(
+            //     color: DefaultColors.backgroundColor,
+            //     child: const TabBarView(
+            //       children: [],
+            //     ),
+            //   ),
+            // ),
           ],
         ),
       ),

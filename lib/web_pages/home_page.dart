@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/chat_message_area/chat_area.dart';
+import 'package:whatsapp_web_clone/chat_message_area/message_area.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 
@@ -13,7 +14,6 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late UserModel userModel;
-
 
   readCurrentUserData() {
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -34,11 +34,12 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-@override
+  @override
   void initState() {
     super.initState();
     readCurrentUserData();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -66,6 +67,14 @@ class _HomePageState extends State<HomePage> {
                     flex: 4,
                     child: ChatArea(
                       userModel: userModel,
+                    ),
+                  ),
+
+                  ///message area
+                  Expanded(
+                    flex: 10,
+                    child: MessageArea(
+                      currentUserData: userModel,
                     ),
                   ),
                 ],

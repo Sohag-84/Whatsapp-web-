@@ -1,17 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/contacts_list.dart';
+import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/recent_chats.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 
-class ChatArea extends StatefulWidget {
+class ChatsArea extends StatefulWidget {
   final UserModel userModel;
-  const ChatArea({super.key, required this.userModel});
+  const ChatsArea({super.key, required this.userModel});
 
   @override
-  State<ChatArea> createState() => _ChatAreaState();
+  State<ChatsArea> createState() => _ChatsAreaState();
 }
 
-class _ChatAreaState extends State<ChatArea> {
+class _ChatsAreaState extends State<ChatsArea> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
@@ -78,14 +80,26 @@ class _ChatAreaState extends State<ChatArea> {
                 Text("Contacts"),
               ],
             ),
-            // Expanded(
-            //   child: Container(
-            //     color: DefaultColors.backgroundColor,
-            //     child: const TabBarView(
-            //       children: [],
-            //     ),
-            //   ),
-            // ),
+            Expanded(
+              child: Container(
+                color: DefaultColors.backgroundColor,
+                child: const TabBarView(
+                  children: [
+                    ///show recent chats
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: RecentChats(),
+                    ),
+
+                    ///show contacts list
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 8.0),
+                      child: ContactsList(),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),

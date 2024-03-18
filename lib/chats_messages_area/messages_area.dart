@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 
-class MessageArea extends StatelessWidget {
+class MessagesArea extends StatelessWidget {
   final UserModel currentUserData;
-  const MessageArea({super.key, required this.currentUserData});
+  const MessagesArea({super.key, required this.currentUserData});
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:whatsapp_web_clone/chat_message_area/chat_area.dart';
-import 'package:whatsapp_web_clone/chat_message_area/message_area.dart';
+import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/chats_area.dart';
+import 'package:whatsapp_web_clone/chats_messages_area/messages_area.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 
@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
                   ///chat area
                   Expanded(
                     flex: 4,
-                    child: ChatArea(
+                    child: ChatsArea(
                       userModel: userModel,
                     ),
                   ),
@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> {
                   ///message area
                   Expanded(
                     flex: 10,
-                    child: MessageArea(
+                    child: MessagesArea(
                       currentUserData: userModel,
                     ),
                   ),

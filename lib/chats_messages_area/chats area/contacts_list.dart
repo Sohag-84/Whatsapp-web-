@@ -97,7 +97,15 @@ class _ContactsListState extends State<ContactsList> {
                           itemBuilder: (context, index) {
                             UserModel contact = userContactList[index];
                             return ListTile(
-                              onTap: () {},
+                              onTap: () {
+                                Future.delayed(Duration.zero, () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    "/messages",
+                                    arguments: contact,
+                                  );
+                                });
+                              },
                               leading: CircleAvatar(
                                 radius: 26,
                                 backgroundColor: Colors.grey,

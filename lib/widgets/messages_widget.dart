@@ -25,6 +25,8 @@ class MessageWidget extends StatelessWidget {
       ),
       child: Column(
         children: [
+          ///display user message
+          const Spacer(),
           ///text field for sending message
           Container(
             padding: const EdgeInsets.all(8),

@@ -1,8 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
-import 'package:whatsapp_web_clone/routes/wep_routes.dart';
+import 'package:whatsapp_web_clone/provider/provider_chat.dart';
+import 'package:whatsapp_web_clone/routes/web_routes.dart';
 
 String firstRoute = "/";
 
@@ -21,7 +23,12 @@ Future<void> main() async {
   if (currentUser != null) {
     firstRoute = "/home";
   }
-  runApp(const MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ProviderChat(),
+      child: const MyApp(),
+    ),
+  );
 }
 
 final ThemeData defaultThemeOfWebApp = ThemeData(

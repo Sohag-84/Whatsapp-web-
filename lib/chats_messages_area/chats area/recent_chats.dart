@@ -10,6 +10,6 @@ class RecentChats extends StatefulWidget {
 class _RecentChatsState extends State<RecentChats> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return const Scaffold();
   }
 }

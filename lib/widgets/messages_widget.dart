@@ -297,20 +297,32 @@ class _MessageWidgetState extends State<MessageWidget> {
                         ),
 
                         ///for select [file]
-                        IconButton(
-                          onPressed: () {
-                            dialogBoxForSelectingFile();
-                          },
-                          icon: const Icon(Icons.attach_file),
-                        ),
+                        _loadingFile
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: DefaultColors.primaryColor,
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  dialogBoxForSelectingFile();
+                                },
+                                icon: const Icon(Icons.attach_file),
+                              ),
 
                         ///for select [image]
-                        IconButton(
-                          onPressed: () {
-                            selectImage();
-                          },
-                          icon: const Icon(Icons.camera_alt),
-                        ),
+                        _loadingPic
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: DefaultColors.primaryColor,
+                                ),
+                              )
+                            : IconButton(
+                                onPressed: () {
+                                  selectImage();
+                                },
+                                icon: const Icon(Icons.camera_alt),
+                              ),
                       ],
                     ),
                   ),

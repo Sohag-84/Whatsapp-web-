@@ -1,26 +1,42 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/chat.dart';
 import 'package:whatsapp_web_clone/models/message.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
+import 'package:whatsapp_web_clone/provider/provider_chat.dart';
 
-class MessageWidget extends StatelessWidget {
+class MessageWidget extends StatefulWidget {
   final UserModel fromUserModel;
   final UserModel toUserModel;
-  MessageWidget({
+  const MessageWidget({
     super.key,
     required this.fromUserModel,
     required this.toUserModel,
   });
 
+  @override
+  State<MessageWidget> createState() => _MessageWidgetState();
+}
+
+class _MessageWidgetState extends State<MessageWidget> {
   final msgController = TextEditingController();
+
+  late StreamSubscription _streamSubscriptionMessages;
+
+  final streamController = StreamController<QuerySnapshot>.broadcast();
+
+  ///for show last message of the list of message. auto scroll work here
+  final scrollControllerMessages = ScrollController();
 
   sendMessage() {
     String msg = msgController.text.trim();
     if (msg.isNotEmpty) {
       ///this is the logged in user id
-      String fromUserId = fromUserModel.uid;
+      String fromUserId = widget.fromUserModel.uid;
       final message = Message(
         uid: fromUserId,
         text: msg,
@@ -28,7 +44,7 @@ class MessageWidget extends StatelessWidget {
       );
 
       ///another user
-      String toUserId = toUserModel.uid;
+      String toUserId = widget.toUserModel.uid;
 
       ///for each message unique id
       String messageId = DateTime.now().microsecondsSinceEpoch.toString();
@@ -46,9 +62,9 @@ class MessageWidget extends StatelessWidget {
         fromUserId: fromUserId,
         toUserId: toUserId,
         lastMessage: message.text.trim(),
-        toUserName: toUserModel.name,
-        toUserEmail: toUserModel.email,
-        toUserImage: toUserModel.image,
+        toUserName: widget.toUserModel.name,
+        toUserEmail: widget.toUserModel.email,
+        toUserImage: widget.toUserModel.image,
       );
 
       ///now save recent chat to database
@@ -70,9 +86,9 @@ class MessageWidget extends StatelessWidget {
         fromUserId: toUserId,
         toUserId: fromUserId,
         lastMessage: message.text.trim(),
-        toUserName: fromUserModel.name,
-        toUserEmail: fromUserModel.email,
-        toUserImage: fromUserModel.image,
+        toUserName: widget.fromUserModel.name,
+        toUserEmail: widget.fromUserModel.email,
+        toUserImage: widget.fromUserModel.image,
       );
 
       ///now save [recent chat] to database
@@ -112,6 +128,56 @@ class MessageWidget extends StatelessWidget {
     });
   }
 
+  ///get message list
+  createMessageListener({UserModel? toUserData}) {
+    ///live refresh our messages page directly from firebase
+    final streamMessages = FirebaseFirestore.instance
+        .collection("messages")
+        .doc(widget.fromUserModel.uid)
+        .collection(toUserData?.uid ?? widget.toUserModel.uid)
+        .orderBy("dateTime", descending: false)
+        .snapshots();
+
+    ///for scroll at the end of messages list
+    _streamSubscriptionMessages = streamMessages.listen((data) {
+      streamController.add(data);
+
+      ///after 1 second auto scroll will be work here.
+      Timer(const Duration(seconds: 1), () {
+        scrollControllerMessages
+            .jumpTo(scrollControllerMessages.position.maxScrollExtent);
+      });
+    });
+  }
+
+  updateMessageListener() {
+    UserModel? toUserData = context.watch<ProviderChat>().toUser;
+
+    if (toUserData != null) {
+      createMessageListener(toUserData: toUserData);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    ///to update the message listener through provider
+    updateMessageListener();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _streamSubscriptionMessages.cancel();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    createMessageListener();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -125,7 +191,71 @@ class MessageWidget extends StatelessWidget {
       child: Column(
         children: [
           ///display user message
-          const Spacer(),
+          StreamBuilder(
+            stream: streamController.stream,
+            builder: (context, snapshot) {
+              switch (snapshot.connectionState) {
+                case ConnectionState.none:
+                case ConnectionState.waiting:
+                  return const Expanded(
+                    child: Center(
+                      child: Column(
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 5),
+                          Text("Loading....")
+                        ],
+                      ),
+                    ),
+                  );
+                case ConnectionState.active:
+                case ConnectionState.done:
+                  if (snapshot.hasError) {
+                    return const Center(
+                      child: Text("Error occured"),
+                    );
+                  } else {
+                    final data = snapshot.data as QuerySnapshot;
+                    List<DocumentSnapshot> messageList = data.docs.toList();
+                    return Expanded(
+                      child: ListView.builder(
+                        itemCount: messageList.length,
+                        itemBuilder: (context, index) {
+                          final message = messageList[index];
+
+                          ///align message balloons from sender and reciever
+                          Alignment alignment = Alignment.bottomLeft;
+                          Color color = Colors.white;
+                          if (widget.fromUserModel.uid == message['uid']) {
+                            alignment = Alignment.bottomRight;
+                            color = const Color(0xFFd2ffa5);
+                          }
+                          Size width = MediaQuery.sizeOf(context) * 0.8;
+                          return GestureDetector(
+                            onDoubleTap: () {},
+                            child: Align(
+                              alignment: alignment,
+                              child: Container(
+                                padding: const EdgeInsets.all(16),
+                                margin: const EdgeInsets.all(6),
+                                constraints: BoxConstraints.loose(width),
+                                decoration: BoxDecoration(
+                                  color: color,
+                                  borderRadius: BorderRadius.circular(9),
+                                ),
+                                child: Text(message['text']),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                default:
+                  return const Text("Error Occurred");
+              }
+            },
+          ),
 
           ///text field for sending message
           Container(

@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
@@ -32,6 +35,10 @@ class _MessageWidgetState extends State<MessageWidget> {
   ///for show last message of the list of message. auto scroll work here
   final scrollControllerMessages = ScrollController();
   String? fileTypeChoosed;
+  bool _loadingPic = false;
+  bool _loadingFile = false;
+  Uint8List? _selectedImage;
+  Uint8List? _selectedFile;
 
   sendMessage() {
     String msg = msgController.text.trim();
@@ -367,6 +374,7 @@ class _MessageWidgetState extends State<MessageWidget> {
               ElevatedButton(
                 onPressed: () {
                   Navigator.pop(context);
+                  selectFile(fileType: fileTypeChoosed!);
                 },
                 child: const Text("Select file"),
               ),
@@ -375,5 +383,39 @@ class _MessageWidgetState extends State<MessageWidget> {
         });
       },
     );
+  }
+
+  selectFile({required String fileType}) async {
+    FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(
+      type: FileType.any,
+    );
+    setState(() {
+      _selectedFile = pickerResult?.files.single.bytes;
+    });
+
+    ///now upload the file
+    uploadFile(_selectedFile);
+  }
+
+  uploadFile(Uint8List? selectedFile) {
+    setState(() {
+      _loadingFile = true;
+    });
+    if (selectedFile != null) {
+      Reference fileRef = FirebaseStorage.instance.ref(
+        "files/${DateTime.now().microsecondsSinceEpoch.toString()}.$fileTypeChoosed",
+      );
+      UploadTask uploadTask = fileRef.putData(selectedFile);
+      uploadTask.whenComplete(() async {
+        String linkFile = await uploadTask.snapshot.ref.getDownloadURL();
+        setState(() {
+          ///show file path in the text field
+          msgController.text = linkFile;
+        });
+      });
+    }
+    setState(() {
+      _loadingFile = false;
+    });
   }
 }

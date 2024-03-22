@@ -284,6 +284,8 @@ class _MessageWidgetState extends State<MessageWidget> {
                       children: [
                         const Icon(Icons.insert_emoticon),
                         const SizedBox(width: 5),
+
+                        ///text field
                         Expanded(
                           child: TextField(
                             controller: msgController,
@@ -294,21 +296,27 @@ class _MessageWidgetState extends State<MessageWidget> {
                           ),
                         ),
 
-                        ///for send [file]
+                        ///for select [file]
                         IconButton(
                           onPressed: () {
                             dialogBoxForSelectingFile();
                           },
                           icon: const Icon(Icons.attach_file),
                         ),
+
+                        ///for select [image]
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            selectImage();
+                          },
                           icon: const Icon(Icons.camera_alt),
                         ),
                       ],
                     ),
                   ),
                 ),
+
+                ///send message button
                 FloatingActionButton(
                   onPressed: () {
                     sendMessage();
@@ -385,6 +393,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     );
   }
 
+  ///select file
   selectFile({required String fileType}) async {
     FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(
       type: FileType.any,
@@ -397,6 +406,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     uploadFile(_selectedFile);
   }
 
+  ///upload file in the database
   uploadFile(Uint8List? selectedFile) {
     setState(() {
       _loadingFile = true;
@@ -416,6 +426,42 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
     setState(() {
       _loadingFile = false;
+    });
+  }
+
+  ///select image
+  selectImage() async {
+    FilePickerResult? pickerResult = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+    setState(() {
+      _selectedImage = pickerResult?.files.single.bytes;
+    });
+
+    ///now upload the file
+    uploadImage(_selectedImage);
+  }
+
+  ///upload image in the database
+  uploadImage(Uint8List? selectedImage) {
+    setState(() {
+      _loadingPic = true;
+    });
+    if (selectedImage != null) {
+      Reference fileRef = FirebaseStorage.instance.ref(
+        "chatImages/${DateTime.now().microsecondsSinceEpoch.toString()}.jpg",
+      );
+      UploadTask uploadTask = fileRef.putData(selectedImage);
+      uploadTask.whenComplete(() async {
+        String linkFile = await uploadTask.snapshot.ref.getDownloadURL();
+        setState(() {
+          ///show file path in the text field
+          msgController.text = linkFile;
+        });
+      });
+    }
+    setState(() {
+      _loadingPic = false;
     });
   }
 }

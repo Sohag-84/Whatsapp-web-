@@ -31,6 +31,7 @@ class _MessageWidgetState extends State<MessageWidget> {
 
   ///for show last message of the list of message. auto scroll work here
   final scrollControllerMessages = ScrollController();
+  String? fileTypeChoosed;
 
   sendMessage() {
     String msg = msgController.text.trim();
@@ -285,8 +286,12 @@ class _MessageWidgetState extends State<MessageWidget> {
                             ),
                           ),
                         ),
+
+                        ///for send [file]
                         IconButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            dialogBoxForSelectingFile();
+                          },
                           icon: const Icon(Icons.attach_file),
                         ),
                         IconButton(
@@ -313,6 +318,62 @@ class _MessageWidgetState extends State<MessageWidget> {
           ),
         ],
       ),
+    );
+  }
+
+  dialogBoxForSelectingFile() {
+    return showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(builder: (context, StateSetter stateSetter) {
+          return AlertDialog(
+            title: const Text("Send file"),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("Please choose file type from the following:"),
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: DropdownButton<String>(
+                    hint: const Text("Choose here"),
+                    value: fileTypeChoosed,
+                    underline: Container(),
+                    items: <String>[
+                      ".pdf",
+                      ".mp4",
+                      ".mp3",
+                      ".docx",
+                      ".pptx",
+                      ".xlsx"
+                    ].map((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(
+                          value,
+                          style: const TextStyle(fontWeight: FontWeight.w500),
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (String? value) {
+                      stateSetter(() {
+                        fileTypeChoosed = value;
+                      });
+                    },
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text("Select file"),
+              ),
+            ],
+          );
+        });
+      },
     );
   }
 }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -240,7 +241,43 @@ class _MessageWidgetState extends State<MessageWidget> {
                           }
                           Size width = MediaQuery.sizeOf(context) * 0.8;
                           return GestureDetector(
-                            onDoubleTap: () {},
+                            onLongPress: () async {
+                              if (message['uid'] ==
+                                  FirebaseAuth.instance.currentUser!.uid) {
+                                await showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          ElevatedButton(
+                                            onPressed: () {},
+                                            child: const Text(
+                                              "Delete for everyone",
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ElevatedButton(
+                                            onPressed: () {},
+                                            child: const Text(
+                                              "Delete for me",
+                                            ),
+                                          ),
+                                          const SizedBox(height: 20),
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text("Cancel"),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+                            },
                             child: message['text'].toString().contains('.jpg')
                                 ? Align(
                                     alignment: alignment,

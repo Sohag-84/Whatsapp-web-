@@ -490,11 +490,11 @@ class _MessageWidgetState extends State<MessageWidget> {
           ///show file path in the text field
           msgController.text = linkFile;
         });
+        setState(() {
+          _loadingFile = false;
+        });
       });
     }
-    setState(() {
-      _loadingFile = false;
-    });
   }
 
   ///select image
@@ -526,10 +526,10 @@ class _MessageWidgetState extends State<MessageWidget> {
           ///show file path in the text field
           msgController.text = linkFile;
         });
+        setState(() {
+          _loadingPic = false;
+        });
       });
     }
-    setState(() {
-      _loadingPic = false;
-    });
   }
 }

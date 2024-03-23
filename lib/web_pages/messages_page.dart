@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 import 'package:whatsapp_web_clone/widgets/messages_widget.dart';
 
@@ -41,6 +42,8 @@ class _MessagesPageState extends State<MessagesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: DefaultColors.primaryColor,
+        iconTheme: const IconThemeData(color: Colors.white),
         centerTitle: true,
         title: Row(
           children: [

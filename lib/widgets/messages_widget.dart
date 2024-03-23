@@ -241,19 +241,75 @@ class _MessageWidgetState extends State<MessageWidget> {
                           Size width = MediaQuery.sizeOf(context) * 0.8;
                           return GestureDetector(
                             onDoubleTap: () {},
-                            child: Align(
-                              alignment: alignment,
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                margin: const EdgeInsets.all(6),
-                                constraints: BoxConstraints.loose(width),
-                                decoration: BoxDecoration(
-                                  color: color,
-                                  borderRadius: BorderRadius.circular(9),
-                                ),
-                                child: Text(message['text']),
-                              ),
-                            ),
+                            child: message['text'].toString().contains('.jpg')
+                                ? Align(
+                                    alignment: alignment,
+                                    child: Container(
+                                      padding: const EdgeInsets.all(16),
+                                      margin: const EdgeInsets.all(6),
+                                      constraints: BoxConstraints.loose(width),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(9),
+                                      ),
+                                      child: Image.network(
+                                        message['text'],
+                                        width: 200,
+                                        height: 200,
+                                      ),
+                                    ),
+                                  )
+                                : message['text'].toString().contains('.pdf') ||
+                                        message['text']
+                                            .toString()
+                                            .contains('.mp4') ||
+                                        message['text']
+                                            .toString()
+                                            .contains('.mp3') ||
+                                        message['text']
+                                            .toString()
+                                            .contains('.docx') ||
+                                        message['text']
+                                            .toString()
+                                            .contains('.pptx') ||
+                                        message['text']
+                                            .toString()
+                                            .contains('.xlsx')
+                                    ? Align(
+                                        alignment: alignment,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          margin: const EdgeInsets.all(6),
+                                          constraints:
+                                              BoxConstraints.loose(width),
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(9),
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {},
+                                            child: Image.asset(
+                                              "assets/images/file.png",
+                                              height: 150,
+                                              width: 150,
+                                            ),
+                                          ),
+                                        ),
+                                      )
+                                    : Align(
+                                        alignment: alignment,
+                                        child: Container(
+                                          padding: const EdgeInsets.all(16),
+                                          margin: const EdgeInsets.all(6),
+                                          constraints:
+                                              BoxConstraints.loose(width),
+                                          decoration: BoxDecoration(
+                                            color: color,
+                                            borderRadius:
+                                                BorderRadius.circular(9),
+                                          ),
+                                          child: Text(message['text']),
+                                        ),
+                                      ),
                           );
                         },
                       ),

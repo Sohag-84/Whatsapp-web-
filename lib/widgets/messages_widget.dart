@@ -252,14 +252,51 @@ class _MessageWidgetState extends State<MessageWidget> {
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           ElevatedButton(
-                                            onPressed: () {},
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+
+                                              ///firstly delete from my side
+                                              await deleteForMe(
+                                                messageId: message.id,
+                                                myId: FirebaseAuth
+                                                    .instance.currentUser!.uid,
+                                                toUserId:
+                                                    widget.toUserModel.uid,
+                                                messageTextToUpdate:
+                                                    message['text'],
+                                              );
+
+                                              ///then delete from other user side
+                                              await deleteForThem(
+                                                messageId: message.id,
+                                                myId: FirebaseAuth
+                                                    .instance.currentUser!.uid,
+                                                toUserId:
+                                                    widget.toUserModel.uid,
+                                                messageTextToUpdate:
+                                                    message['text'],
+                                              );
+                                            },
                                             child: const Text(
                                               "Delete for everyone",
                                             ),
                                           ),
                                           const SizedBox(height: 20),
                                           ElevatedButton(
-                                            onPressed: () {},
+                                            onPressed: () async {
+                                              Navigator.pop(context);
+
+                                              ///delete from my side
+                                              await deleteForMe(
+                                                messageId: message.id,
+                                                myId: FirebaseAuth
+                                                    .instance.currentUser!.uid,
+                                                toUserId:
+                                                    widget.toUserModel.uid,
+                                                messageTextToUpdate:
+                                                    message['text'],
+                                              );
+                                            },
                                             child: const Text(
                                               "Delete for me",
                                             ),
@@ -568,5 +605,40 @@ class _MessageWidgetState extends State<MessageWidget> {
         });
       });
     }
+  }
+
+  ///for delete message [for me]
+  deleteForMe({
+    required String messageId,
+    required String myId,
+    required String toUserId,
+    required String messageTextToUpdate,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection("messages")
+        .doc(myId)
+        .collection(toUserId)
+        .doc(messageId)
+        .update({
+      'text': "🚫 message deleted",
+    });
+  }
+
+  ///for delete message [for everyone]
+  ///[note: for delete message from both side then first of all I have to delete my side then others user side]
+  deleteForThem({
+    required String messageId,
+    required String myId,
+    required String toUserId,
+    required String messageTextToUpdate,
+  }) async {
+    await FirebaseFirestore.instance
+        .collection("messages")
+        .doc(toUserId)
+        .collection(myId)
+        .doc(messageId)
+        .update({
+      'text': "🚫 message deleted",
+    });
   }
 }

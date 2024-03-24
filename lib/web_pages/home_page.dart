@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/chats_area.dart';
 import 'package:whatsapp_web_clone/chats_messages_area/messages_area.dart';
@@ -15,7 +16,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   late UserModel userModel;
 
-  readCurrentUserData() {
+  readCurrentUserData() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       String uid = currentUser.uid;
@@ -32,6 +33,21 @@ class _HomePageState extends State<HomePage> {
         image: image,
       );
     }
+
+    await getPermisionForNotification();
+  }
+
+  getPermisionForNotification() async {
+    FirebaseMessaging messaging = FirebaseMessaging.instance;
+    await messaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
   }
 
   @override

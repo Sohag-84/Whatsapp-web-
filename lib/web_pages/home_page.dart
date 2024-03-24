@@ -5,6 +5,7 @@ import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/chats_area.d
 import 'package:whatsapp_web_clone/chats_messages_area/messages_area.dart';
 import 'package:whatsapp_web_clone/default_color/default_colors.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
+import 'package:whatsapp_web_clone/widgets/notification_dialog_widget.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -35,8 +36,10 @@ class _HomePageState extends State<HomePage> {
     }
 
     await getPermisionForNotification();
+    await pushNotificationMessageListener();
   }
 
+  ///for device permission
   getPermisionForNotification() async {
     FirebaseMessaging messaging = FirebaseMessaging.instance;
     await messaging.requestPermission(
@@ -48,6 +51,22 @@ class _HomePageState extends State<HomePage> {
       provisional: false,
       sound: true,
     );
+  }
+
+  pushNotificationMessageListener() async {
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      if (message.notification != null) {
+        showDialog(
+          context: context,
+          builder: (context) {
+            return NotificationDialogWidget(
+              title: message.notification!.title!,
+              bodyText: message.notification!.body!,
+            );
+          },
+        );
+      }
+    });
   }
 
   @override

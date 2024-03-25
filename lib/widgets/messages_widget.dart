@@ -40,7 +40,26 @@ class _MessageWidgetState extends State<MessageWidget> {
   bool _loadingFile = false;
   Uint8List? _selectedImage;
   Uint8List? _selectedFile;
+  String? _token;
 
+  ///for send push notification
+  sendPushNotificationToWEB({
+    required String msgText,
+    required String fromUserName,
+  }) {
+    if (_token == null) {
+      var snackBar = const SnackBar(
+        backgroundColor: DefaultColors.primaryColor,
+        content: Center(
+          child: Text("No token exists,Unable to send notification "),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+  }
+
+  ///for send message
   sendMessage() {
     String msg = msgController.text.trim();
     if (msg.isNotEmpty) {
@@ -132,7 +151,18 @@ class _MessageWidgetState extends State<MessageWidget> {
         .collection('lastMessage')
         .doc(chat.toUserId)
         .set(chat.toMap())
-        .then((value) {
+        .then((value) async {
+      ///before send notification, we heve to get reciever fcm token
+      await FirebaseFirestore.instance
+          .collection("users")
+          .doc(chat.toUserId)
+          .get()
+          .then((snapshot) {
+        setState(() {
+          _token = snapshot.data()!['token'];
+        });
+      });
+
       ///send push notification
     });
   }

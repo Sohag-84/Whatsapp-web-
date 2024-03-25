@@ -1,5 +1,9 @@
+import 'dart:developer';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:whatsapp_web_clone/chats_messages_area/chats%20area/chats_area.dart';
 import 'package:whatsapp_web_clone/chats_messages_area/messages_area.dart';
@@ -16,6 +20,8 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late UserModel userModel;
+  String? _token;
+  Stream<String>? _tokenStream;
 
   readCurrentUserData() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -37,6 +43,15 @@ class _HomePageState extends State<HomePage> {
 
     await getPermisionForNotification();
     await pushNotificationMessageListener();
+
+    ///for device token
+    await FirebaseMessaging.instance.getToken().then(setTokenNow);
+
+    ///for refresh token
+    _tokenStream = FirebaseMessaging.instance.onTokenRefresh;
+    _tokenStream!.listen(setTokenNow);
+
+    await saveTokenToUserInfo();
   }
 
   ///for device permission
@@ -66,6 +81,26 @@ class _HomePageState extends State<HomePage> {
           },
         );
       }
+    });
+  }
+
+  ///to set token in variable
+  setTokenNow(String? token) {
+    if (kDebugMode) {
+      print("\n FCM user recognition token: $token \n");
+    }
+    setState(() {
+      _token = token;
+    });
+  }
+
+  ///save token to user inforamtion
+  saveTokenToUserInfo() async {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(FirebaseAuth.instance.currentUser!.uid)
+        .update({
+      'token': _token,
     });
   }
 

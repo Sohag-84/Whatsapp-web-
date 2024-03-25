@@ -63,7 +63,7 @@ class _MessageWidgetState extends State<MessageWidget> {
     }
     try {
       await http.post(
-        Uri.parse(" https://fcm.googleapis.com/fcm/send"),
+        Uri.parse("https://fcm.googleapis.com/fcm/send"),
         headers: <String, String>{
           'Content-type': 'application/json',
           'Authorization':

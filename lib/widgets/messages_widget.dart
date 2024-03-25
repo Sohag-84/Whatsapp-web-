@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'dart:async';
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -12,6 +15,7 @@ import 'package:whatsapp_web_clone/models/chat.dart';
 import 'package:whatsapp_web_clone/models/message.dart';
 import 'package:whatsapp_web_clone/models/user_model.dart';
 import 'package:whatsapp_web_clone/provider/provider_chat.dart';
+import 'package:http/http.dart' as http;
 
 class MessageWidget extends StatefulWidget {
   final UserModel fromUserModel;
@@ -46,7 +50,7 @@ class _MessageWidgetState extends State<MessageWidget> {
   sendPushNotificationToWEB({
     required String msgText,
     required String fromUserName,
-  }) {
+  }) async {
     if (_token == null) {
       var snackBar = const SnackBar(
         backgroundColor: DefaultColors.primaryColor,
@@ -56,6 +60,33 @@ class _MessageWidgetState extends State<MessageWidget> {
       );
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
+    }
+    try {
+      await http.post(
+        Uri.parse(" https://fcm.googleapis.com/fcm/send"),
+        headers: <String, String>{
+          'Content-type': 'application/json',
+          'Authorization':
+              'key=AAAAh138htM:APA91bFy9rswzcwKjLddctwANJqb5f1zvpUnuXfKAI_tXjhrBB-iclZkolhXW29OrATB0JMjXPzy17L_ZXuPl_DvlLlHphpx-Zjw5_QhaHLATWXAMIa99yFhs_3HbMm4W4WhOFVmHvui'
+        },
+        body: json.encode({
+          'to': _token,
+          'message': {'to': _token},
+          'notification': {
+            ///title-->that means send name
+            'title': fromUserName,
+            'body': msgText,
+          }
+        }),
+      );
+    } catch (e) {
+      var snackBar = SnackBar(
+        backgroundColor: DefaultColors.primaryColor,
+        content: Center(
+          child: Text("Error: $e"),
+        ),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
     }
   }
 
@@ -164,6 +195,10 @@ class _MessageWidgetState extends State<MessageWidget> {
       });
 
       ///send push notification
+      sendPushNotificationToWEB(
+        msgText: messageText,
+        fromUserName: widget.fromUserModel.name,
+      );
     });
   }
 
